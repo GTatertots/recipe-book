@@ -1,0 +1,49 @@
+body {
+	font-family: monospace;
+	background-color: #faf3ed;
+	text-align: center;
+	margin: 0;
+	font-size: 15pt;
+}
+
+h1 {
+  font-family: monospace;
+}
+
+ul {
+	list-style-type: none;
+	padding: 0%;
+}
+
+table {
+  width: 80%;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  margin-left: auto;
+  margin-right: auto;  
+  border-collapse: collapse;
+}
+
+.fullRecipe {
+  border: none !important;
+  background-color: #ffffff;
+}
+
+table tr {
+  margin: 0px;
+}
+
+.recipeRow:hover {
+  background-color: #fae8c6 !important;
+}
+
+Table td, Table th {
+  border: 2px solid black;
+  padding: 8px;
+}
+
+Table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  color:white;
+}

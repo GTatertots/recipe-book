@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h1>My Recipe Book</h1>
+    <div id="app">
+    <!-- everything in here is managed by Vue -->
+    <!-- Login display goes here -->
+      <div v-show="displayLogin">
+	<h3>Sign in to see your recipes</h3>
+	<input type="text" placeholder="Email" v-model="userEmail">
+        <div> {{ userErrorMessages.userEmail }} </div>
+        <input type="password" placeholder="Password" v-model="userPassword">
+        <div> {{ userErrorMessages.userPassword }} </div>
+	<div> {{ userErrorMessages.authentication }} </div>
+	<button @click="loginButton">Log in</button>
+	<button @click="goToRegister">Register</button>
+      </div>
+      <!-- Registration display goes here -->
+      <div v-show="displayRegister">
+	<h3>Make a free account to have your own recipe book</h3>
+	<input type="text" placeholder="First Name" v-model="userFirst">
+        <div> {{ userErrorMessages.userFirst }} </div>
+        <input type="text" placeholder="Last Name" v-model="userLast">
+        <div> {{ userErrorMessages.userLast }} </div>
+	<input type="text" placeholder="Email" v-model="userEmail">
+        <div> {{ userErrorMessages.userEmail }} </div>
+        <input type="password" placeholder="Password" v-model="userPassword">
+	<div><input type="password" placeholder="Confirm Password" v-model="userPassword2"></div>
+        <div> {{ userErrorMessages.userPassword }} </div>
+	<div> {{ userErrorMessages.authentication }} </div>
+	<button @click="goBackToLogin">Go back</button>
+	<button @click="registerButton">Create User</button>
+      </div>
+      <!--Display all recipes goes here-->
+      <div v-show="displayRecipes">
+	<div><button @click="logoutButton">Logout</button></div>
+	<button @click="addRecipeToggle">Add Recipe</button>
+	<div v-show="filterPresent">
+	  <button @click="removeFilters">Remove filters</button>
+	</div>
+        <table id="recipeTable">
+          <tr style="background-color: #9c6940">
+		  <th>Name
+		    <select @change="applyFilters" v-model=orderByField>  
+		          <option value="">None</option>
+                          <option value="name1">A-Z</option>
+                          <option value="name-1">Z-A</option>
+		    </select>
+		  </th>
+		  <th>Cook time
+		    <select @change="applyFilters" v-model=orderByField>
+                          <option value="">None</option>
+                          <option value="time1">low-high</option>
+			  <option value="time-1">high-low</option>
+                    </select>
+		  </th>
+		  <th>Meal type
+		    <select @change="applyFilters" v-model=orderByField>
+                          <option value="">None</option>
+                          <option value="type1">A-Z</option>
+                          <option value="type-1">Z-A</option>
+                    </select>
+		  </th>
+	          <th>Ingredients</th>
+	  </tr>
+	  <tr style="background-color: #9c6940">
+		  <td><input type="text" placeholder="Omelet, Tacos, etc." v-on:keyup.enter="applyFilters" v-model="filterName"></td>
+		  <td><input type="number" placeholder="45, 60, 20, etc." v-on:keyup.enter="applyFilters" v-model="filterTime"></td>
+		  <td> 
+            		<select @change="applyFilters" v-model="filterType">
+			  <option value="">No filter</option>
+              		  <option value="Breakfast">Breakfast</option>
+              		  <option value="Entree">Entree</option>
+              		  <option value="Dessert">Dessert</option>
+              		  <option value="Side">Side</option>
+              		  <option value="Snack">Snack</option>
+              		  <option value="Bread">Bread</option>
+            		</select>
+		  </td>
+		  <td><input type="text" placeholder="Milk, Bread, Eggs, etc." v-on:keyup.enter="applyFilters" v-model="filterIngredients">
+		  </td>
+	  </tr>
+          <tr class="recipeRow" v-for="recipe, i in recipes" @click="getFullRecipeButton(recipe)" v-bind:style="{ backgroundColor: i % 2 == 0 ? '#f5e1d0' : '#faf3ed' }">
+	          <td><strong>{{ recipe.name }}</strong></td>
+	          <td>{{ recipe.time }} minutes</td>
+	          <td>{{ recipe.type }}</td>
+		  <td style="text-align: left">
+			  <div v-for="ingredient, in recipe.ingredients"> {{ ingredient }} </div>
+		  </td>
+          </tr>
+        </table>
+      </div>
+      <!--full recipe goes here-->
+      <div v-show="displayFullRecipe">
+	<div><button @click="logoutButton">Logout</button></div>
+	<button @click="goBackButton">Go Back</button>      
+        <table class="fullRecipe">    
+	  <tr style="background-color: #9c6940">
+                  <th><strong>{{ fullRecipe.name }}</strong></th>
+                  <th>{{ fullRecipe.time }} minutes</th>
+                  <th>{{ fullRecipe.type }}</th>
+	  </tr>
+	  <tr>
+                  <td style="text-align: left"><div v-for="ingredient in fullRecipe.ingredients"> {{ ingredient }} </div></td>
+		  <td colspan="2" style="text-align: left"><div v-for="instruction in fullRecipe.instructions"> {{ instruction }} </div></td>
+          </tr>
+	</table>
+	<div v-show="!confirmDelete">
+	  <button @click="editButton(fullRecipe)">Edit</button>
+          <button @click="deleteButton(fullRecipe)">Delete</button>
+	</div>
+	<div v-show="confirmDelete">Are you sure you want to delete?
+	  <button @click="confirmDelete = false">No</button>  
+	  <button @click="deleteButton(fullRecipe)">Yes</button>
+	</div>
+      </div>
+      <!--add recipe goes here-->
+      <div v-show="displayAdd">
+	<div><button @click="logoutButton">Logout</button></div>
+	<button @click="goBackButton">Go Back</button>
+	<table class="fullRecipe"> 
+	  <tr style="background-color: #9c6940">
+	    <th>
+	      <input type="text" placeholder="Name of recipe" v-model="recipeName">
+              <div> {{ recipeErrorMessages.recipeName }} </div>
+            </th>
+            <th>
+              <input type="number" placeholder="Cook/Prep time of recipe" v-model="recipeTime">
+	      <div> {{ recipeErrorMessages.recipeTime }} </div>
+            </th>
+            <th>
+              <select v-model="recipeType">
+    	        <option value="Breakfast">Breakfast</option>
+    	        <option value="Entree">Entree</option>
+    	        <option value="Dessert">Dessert</option>
+    	        <option value="Side">Side</option>
+	        <option value="Snack">Snack</option>
+	        <option value="Bread">Bread</option>
+  	      </select>
+              <div> {{ recipeErrorMessages.recipeType }} </div>
+            </th>
+	  </tr>
+	  <tr>
+            <td>
+	      <textarea type="text" placeholder="Ingredients" v-model="recipeIngredients" rows="4" cols="50"></textarea>
+              <div> {{ recipeErrorMessages.recipeIngredients }} </div>
+            </td>
+            <td colspan="2">
+	      <textarea type="text" placeholder="Instructions" v-model="recipeInstructions" rows="4" cols="50"></textarea>
+	      <div> {{ recipeErrorMessages.recipeInstructions }} </div>
+            </td>
+	  </tr>
+	</table>
+        <button v-on:click="addRecipeButton">Add Recipe</button>			
+      </div>
+      <!--display update goes here-->
+      <div v-show="displayUpdate">
+	<div><button @click="logoutButton">Logout</button></div>
+        <button @click="goBackToFull">Go Back</button>
+        <table class="fullRecipe">
+          <tr style="background-color: #9c6940">
+	    <th>
+              <input type="text" placeholder="Name of recipe" v-model="recipeName">
+              <div> {{ recipeErrorMessages.recipeName }} </div>
+            </th>
+            <th>
+              <input type="number" placeholder="Cook/Prep time of recipe" v-model="recipeTime">
+              <div> {{ recipeErrorMessages.recipeTime }} </div>
+            </th>
+            <th>
+              <select v-model="recipeType">
+                <option value="Breakfast">Breakfast</option>
+	        <option value="Entree">Entree</option>
+                <option value="Dessert">Dessert</option>
+                <option value="Side">Side</option>
+                <option value="Snack">Snack</option>
+                <option value="Bread">Bread</option>
+              </select>
+              <div> {{ recipeErrorMessages.recipeType }} </div>
+            </th>
+	  </tr>
+	  <tr>
+            <td>
+              <textarea type="text" placeholder="Ingredients" v-model="recipeIngredients" rows="4" cols="50"></textarea>
+              <div> {{ recipeErrorMessages.recipeIngredients }} </div>
+            </td>
+	    <td colspan="2">
+              <textarea type="text" placeholder="Instructions" v-model="recipeInstructions" rows="4" cols="50"></textarea>
+              <div> {{ recipeErrorMessages.recipeInstructions }} </div>
+            </td>
+	  </tr>
+	</table>
+	<button v-on:click="makeChangeButton(fullRecipe)">Make Changes</button>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.47/vue.global.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
+
+
+
+
