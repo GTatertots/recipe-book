@@ -1,5 +1,7 @@
 # My Recipe Book
 
+![image](https://github.com/GTatertots/recipe-book/assets/112660424/6030e62a-d321-4eac-b704-1a9d5b035663)
+
 ## Resource
 
 **Recipe**
