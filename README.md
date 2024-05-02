@@ -1,5 +1,14 @@
 # My Recipe Book
 
+My Recipe Book is a project designed to keep a collection of recipes online. The tech stack is as follows:
+
+* Vue.js
+* Express.js
+* MongoDB
+* HTML/CSS
+
+This project was completed as a midterm project for a Web Application Development course and was presented in a Computing Showcase.
+
 ![image](https://github.com/GTatertots/recipe-book/assets/112660424/6030e62a-d321-4eac-b704-1a9d5b035663)
 
 ## Resource
